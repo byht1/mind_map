@@ -1,77 +1,50 @@
-import React, { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { FC } from 'react'
 import { Element, Input, NodeList, NodeBox, BoxBtn } from './Node.styled'
 import { NodeButton } from '../NodeButton'
 import { RenameButton } from '../RenameButton'
-import { renameNodeSelect, setFocusSelect, useTreeStore } from '../../store/tree'
+import { useTreeNodeOperations } from './hook'
 
 export type NodeProps = {
   id: string
   name: string
   next: NodeProps[]
   prevLayer?: number
+  isFirst?: true
 }
 
-export const Node: FC<NodeProps> = ({ id, name, next, prevLayer = 0 }) => {
-  const [isDisabled, setIsDisabled] = useState(true)
-  const setFocused = useTreeStore(setFocusSelect)
-  const renameNode = useTreeStore(renameNodeSelect)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const layer = prevLayer % 4
-
-  useEffect(() => {
-    if (isDisabled) return
-    if (inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-    }
-  }, [id, isDisabled, renameNode])
-
-  const saveNewName = useCallback(() => {
-    const value = inputRef.current?.value || ''
-    renameNode(id, value)
-    setIsDisabled(true)
-    setFocused(false)
-  }, [id, renameNode, setFocused])
-
-  const cancelRename = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.value = name
-    }
-    setIsDisabled(true)
-  }, [name])
-
-  const handleKeyPress = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        saveNewName()
-      }
-      if (e.key === 'Escape') {
-        cancelRename()
-      }
-    },
-    [saveNewName, cancelRename]
-  )
+export const Node: FC<NodeProps> = ({ id, name, next, prevLayer = 0, isFirst = false }) => {
+  const {
+    cancelRename,
+    handleKeyPress,
+    saveNewName,
+    layer,
+    inputRef,
+    isDisabled,
+    nameLength,
+    childrenLength,
+    setIsDisabled,
+  } = useTreeNodeOperations(id, name, next, prevLayer)
 
   return (
     <Element>
-      <NodeBox count={next.length} layer={layer} name={name}>
+      <NodeBox count={childrenLength} layer={layer} name={name}>
         <Input
           type="text"
           onKeyPress={handleKeyPress}
           defaultValue={name}
-          size={name.length || 1}
+          size={nameLength}
           disabled={isDisabled}
           ref={inputRef}
         />
         <BoxBtn>
           {isDisabled ? (
-            <NodeButton id={id} setDisabled={setIsDisabled} />
+            <NodeButton id={id} setDisabled={setIsDisabled} isFirst={isFirst} />
           ) : (
             <RenameButton cancel={cancelRename} save={saveNewName} />
           )}
         </BoxBtn>
       </NodeBox>
-      {!!next.length && (
+      {!!childrenLength && (
         <NodeList>
           {next.map((el) => (
             <Node key={el.id} {...el} prevLayer={prevLayer + 1} />

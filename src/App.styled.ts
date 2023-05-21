@@ -6,6 +6,5 @@ type PropsMouseBox = {
 }
 
 export const MouseBox = styled.div<PropsMouseBox>`
-  /* transform: ${({ x, y }) => `translate(50%, 50%)`}; */
   transform: ${({ x, y }) => `translate(${x}px, ${y}px)`};
 `

@@ -8,7 +8,7 @@ export const Tree: FC<PropsTree> = ({ tree }) => {
   return (
     <Box>
       <RootList>
-        <Node {...tree} />
+        <Node {...tree} isFirst={true} />
       </RootList>
     </Box>
   )

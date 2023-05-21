@@ -5,9 +5,10 @@ import { addNodeSelect, deleteNodeSelect, setFocusSelect, useTreeStore } from '.
 type PropsNodeButton = {
   id: string
   setDisabled: Dispatch<SetStateAction<boolean>>
+  isFirst: boolean
 }
 
-export const NodeButton: FC<PropsNodeButton> = ({ id, setDisabled }) => {
+export const NodeButton: FC<PropsNodeButton> = ({ id, isFirst, setDisabled }) => {
   const addNode = useTreeStore(addNodeSelect)
   const deleteNode = useTreeStore(deleteNodeSelect)
   const setFocused = useTreeStore(setFocusSelect)
@@ -19,7 +20,7 @@ export const NodeButton: FC<PropsNodeButton> = ({ id, setDisabled }) => {
   return (
     <>
       <Button icon="write" fn={() => initiateRename()} />
-      <Button icon="close" fn={() => deleteNode(id)} />
+      {!isFirst && <Button icon="close" fn={() => deleteNode(id)} />}
       <Button icon="add" fn={() => addNode(id)} />
     </>
   )
